@@ -26,11 +26,11 @@ namespace Gatos.Monitor
 
         protected override void OnIntensiveSamplingStart()
         {
+            var snapshots = new List<HeapSnapshot>();
             using (var target = DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, 1000, AttachFlag.Passive))
             {
                 var runtime = target.ClrVersions[0].CreateRuntime();
 
-                var snapshots = new List<HeapSnapshot>();
                 for (int i = 0; i < SnapshotCount; ++i)
                 {
                     snapshots.Add(new HeapSnapshot(runtime.Heap, TopTypes));
@@ -38,7 +38,18 @@ namespace Gatos.Monitor
                 }
             }
 
-            // TODO Compare the snapshots
+            for (int i = 0; i < SnapshotCount; ++i)
+            {
+                for (int j = i + 1; j < SnapshotCount; ++j)
+                {
+                    var diff = HeapSnapshot.Diff(snapshots[i], snapshots[j]);
+                    WriteTraceLine($"Diff between snapshot {i} (baseline) and snapshot {j}:");
+                    foreach (var typeSize in diff.SizeByType.OrderByDescending(v => v.Value))
+                    {
+                        WriteTraceLine($"  {typeSize.Key,10} {typeSize.Value,8} {diff.CountByType[typeSize.Key],8}");
+                    }
+                }
+            }
         }
 
         public static LeakMonitor Start()
