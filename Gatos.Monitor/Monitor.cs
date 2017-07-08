@@ -17,7 +17,7 @@ namespace Gatos.Monitor
 
         private Timer _sampleTimer;
         private PerformanceCounter _performanceCounter;
-        private bool _intensiveMode;
+        private volatile bool _intensiveMode;
         private int _consecutiveViolations;
         private string _name;
 

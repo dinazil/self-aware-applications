@@ -11,5 +11,10 @@ namespace Gatos.Monitor
         // TODO Periodically check if there's a deadlock by walking thread wait chains
         //      and looking for cycles. Show the simple version using only CLRMD BlockingObject
         //      here, and explain that msos has support for additional synchronization types.
+
+        public static DeadlockMonitor Start()
+        {
+            return new DeadlockMonitor();
+        }
     }
 }

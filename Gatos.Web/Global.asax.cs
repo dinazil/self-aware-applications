@@ -14,6 +14,8 @@ namespace Gatos.Web
     {
         private CPUMonitor _cpuMonitor;
         private AllocMonitor _allocMonitor;
+        private LeakMonitor _leakMonitor;
+        private DeadlockMonitor _deadlockMonitor;
 
         protected void Application_Start()
         {
@@ -25,6 +27,8 @@ namespace Gatos.Web
 
             _cpuMonitor = CPUMonitor.Start();
             _allocMonitor = AllocMonitor.Start();
+            _leakMonitor = LeakMonitor.Start();
+            _deadlockMonitor = DeadlockMonitor.Start();
         }
     }
 }

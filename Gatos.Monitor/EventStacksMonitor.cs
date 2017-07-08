@@ -13,7 +13,6 @@ namespace Gatos.Monitor
     public abstract class EventStacksMonitor : Monitor
     {
         private static readonly TimeSpan IntensiveSamplingDuration = TimeSpan.FromSeconds(5);
-
         private const int TopStacksToReport = 3;
 
         private StackResolver _resolver = new StackResolver();
