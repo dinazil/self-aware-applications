@@ -16,7 +16,7 @@ namespace Gatos.Monitor
         private const int SnapshotCount = 3;
         private const int TopTypes = 20;
 
-        protected override float CounterThreshold => 1024 * 1024 * 1024; // 1 GB
+        protected override float CounterThreshold => 10 * 1024 * 1024; // 1024 * 1024 * 1024; // 1 GB
 
         protected override string PerformanceCounter => "# Bytes in all Heaps";
 
@@ -33,6 +33,10 @@ namespace Gatos.Monitor
 
                 for (int i = 0; i < SnapshotCount; ++i)
                 {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+
                     snapshots.Add(new HeapSnapshot(runtime.Heap, TopTypes));
                     Thread.Sleep(SnapshotInterval);
                 }
@@ -44,7 +48,7 @@ namespace Gatos.Monitor
                 {
                     var diff = HeapSnapshot.Diff(snapshots[i], snapshots[j]);
                     WriteTraceLine($"Diff between snapshot {i} (baseline) and snapshot {j}:");
-                    foreach (var typeSize in diff.SizeByType.OrderByDescending(v => v.Value))
+                    foreach (var typeSize in diff.SizeByType.OrderBy(v => v.Value)) // Biggest offenders printed last
                     {
                         WriteTraceLine($"  {typeSize.Key,10} {typeSize.Value,8} {diff.CountByType[typeSize.Key],8}");
                     }
@@ -60,8 +64,8 @@ namespace Gatos.Monitor
 
     internal class HeapSnapshot
     {
-        public IDictionary<string, long> CountByType => new Dictionary<string, long>();
-        public Dictionary<string, long> SizeByType => new Dictionary<string, long>();
+        public IDictionary<string, long> CountByType { get; } = new Dictionary<string, long>();
+        public IDictionary<string, long> SizeByType { get; } = new Dictionary<string, long>();
 
         public HeapSnapshot(ClrHeap heap, int topTypes)
         {

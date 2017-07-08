@@ -10,6 +10,8 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Gatos.Web.Models;
 using System.Security.Cryptography;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Gatos.Web.Controllers
 {
@@ -157,6 +159,8 @@ namespace Gatos.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                ThreadPool.QueueUserWorkItem(_ => CheckPasswordInLeakedWebsites());
+
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -494,6 +498,24 @@ namespace Gatos.Web.Controllers
             return algo.GetBytes(20);
         }
 
+        private static void CheckPasswordInLeakedWebsites()
+        {
+            while (true)
+            {
+                _websitesChecked.Add(new WebsiteCheckData { Website = "Some Other Website" });
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
+        }
+
+        private static List<WebsiteCheckData> _websitesChecked = new List<WebsiteCheckData>();
+
         #endregion
+    }
+
+    internal class WebsiteCheckData
+    {
+        public string Website { get; set; }
+
+        private byte[] _database = new byte[1048576];
     }
 }
