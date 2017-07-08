@@ -88,6 +88,7 @@
     <Compile Include="AllocMonitor.cs" />
     <Compile Include="CPUMonitor.cs" />
     <Compile Include="DeadlockMonitor.cs" />
+    <Compile Include="EventStacksMonitor.cs" />
     <Compile Include="LeakMonitor.cs" />
     <Compile Include="LiveSession.cs" />
     <Compile Include="Monitor.cs" />

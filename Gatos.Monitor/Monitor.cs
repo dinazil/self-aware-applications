@@ -13,28 +13,24 @@ namespace Gatos.Monitor
     public abstract class Monitor
     {
         private static readonly TimeSpan SamplingInterval = TimeSpan.FromSeconds(1);
-        private static readonly TimeSpan IntensiveSamplingDuration = TimeSpan.FromSeconds(5);
         private const int ConsecutiveViolationsThreshold = 3;
-        private const int TopStacksToReport = 3;
 
         private Timer _sampleTimer;
         private PerformanceCounter _performanceCounter;
         private bool _intensiveMode;
         private int _consecutiveViolations;
-        private StackResolver _resolver = new StackResolver();
         private string _name;
 
         protected abstract float CounterThreshold { get; }
-        protected abstract string EventSpecification { get; }
         protected abstract string PerformanceCounter { get; }
         protected abstract string PerformanceCategory { get; }
         protected abstract string PerformanceInstance { get; }
 
-        protected virtual void OnIntensiveSamplingDone()
+        protected virtual void OnIntensiveSamplingStart()
         {
         }
 
-        protected virtual void OnEventOccurred(TraceEvent @event)
+        protected virtual void OnIntensiveSamplingDone()
         {
         }
 
@@ -79,24 +75,7 @@ namespace Gatos.Monitor
 
         private void SampleIntensively()
         {
-            int currentPid = Process.GetCurrentProcess().Id;
-            var session = new LiveSession(EventSpecification, new[] { currentPid }, includeKernelFrames: false);
-            session.EventOccurred += OnEventOccurred;
-            Task.Run(() => session.Start());
-            Thread.Sleep(IntensiveSamplingDuration);
-            session.Stop();
-
-            WriteTraceLine($"Top {TopStacksToReport} stacks gathered during intensive sampling:");
-            foreach (var stack in session.Stacks.TopStacks(TopStacksToReport, 0))
-            {
-                WriteTraceLine("");
-                WriteTraceLine($"  {stack.Count,10}");
-                foreach (var symbol in _resolver.Resolve(currentPid, stack.Addresses))
-                {
-                    WriteTraceLine("    " + symbol.ToString());
-                }
-            }
-
+            OnIntensiveSamplingStart();
             OnIntensiveSamplingDone();
             _intensiveMode = false;
             WriteTraceLine("Intensive sampling mode done");

@@ -11,7 +11,7 @@ using Microsoft.Diagnostics.Runtime;
 
 namespace Gatos.Monitor
 {
-    public class AllocMonitor : Monitor
+    public class AllocMonitor : EventStacksMonitor
     {
         private long _totalAllocs;
         private long _totalAllocatedBytes;

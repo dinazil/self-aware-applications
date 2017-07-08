@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Gatos.Monitor
 {
-    public class CPUMonitor : Monitor
+    public class CPUMonitor : EventStacksMonitor
     {
         protected override float CounterThreshold => 90.0f / Environment.ProcessorCount; // 90% of one CPU
 
