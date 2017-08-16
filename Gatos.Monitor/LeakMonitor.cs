@@ -27,16 +27,15 @@ namespace Gatos.Monitor
         protected override void OnIntensiveSamplingStart()
         {
             var snapshots = new List<HeapSnapshot>();
-            using (var target = DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, 1000, AttachFlag.Passive))
+            for (int i = 0; i < SnapshotCount; ++i)
             {
-                var runtime = target.ClrVersions[0].CreateRuntime();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
 
-                for (int i = 0; i < SnapshotCount; ++i)
+                using (var target = DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, 1000, AttachFlag.Passive))
                 {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-
+                    var runtime = target.ClrVersions[0].CreateRuntime();
                     snapshots.Add(new HeapSnapshot(runtime.Heap, TopTypes));
                     Thread.Sleep(SnapshotInterval);
                 }
